@@ -1,0 +1,77 @@
+substitutions:
+  name: mi_desk_lamp
+
+esphome:
+  name: ${name}
+  platform: ESP8266
+  board: esp8285
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+
+ota:
+api:
+logger:
+
+sensor:
+  - platform: rotary_encoder
+    id: rotation
+    pin_a: GPIO13
+    pin_b: GPIO12
+    resolution: 2
+    on_value:
+      then:
+        - if:
+            condition:
+              # Check if Button is pressed while rotating
+              lambda: 'return id(button).state;'
+            then:
+              # If Button is pressed, change CW/WW
+              - lambda: |-
+                  auto min_temp = id(light1).get_traits().get_min_mireds();
+                  auto max_temp = id(light1).get_traits().get_max_mireds();
+                  auto cur_temp = id(light1).current_values.get_color_temperature();
+                  auto new_temp = max(min_temp, min(max_temp, cur_temp + (x * 10)));
+                  auto call = id(light1).turn_on();
+                  call.set_color_temperature(new_temp);
+                  call.perform();
+            else:
+              # If Button is not pressed, change brightness
+              - light.dim_relative:
+                  id: light1
+                  relative_brightness: !lambda |-
+                    return x / 25.0;
+        # Reset Rotation to 0
+        - sensor.rotary_encoder.set_value:
+            id: rotation
+            value: 0
+
+binary_sensor:
+  - platform: gpio
+    id: button
+    pin:
+      number: GPIO2
+      inverted: true
+    on_click:
+      then:
+        - light.toggle: light1
+
+output:
+  - platform: esp8266_pwm
+    pin: GPIO4
+    id: output_cold
+  - platform: esp8266_pwm
+    pin: GPIO5
+    id: output_warm
+
+light:
+  - platform: cwww
+    id: light1
+    default_transition_length: 0s
+    constant_brightness: true
+    name: "${name} Light"
+    cold_white: output_cold
+    warm_white: output_warm
+    cold_white_color_temperature: 6500K
+    warm_white_color_temperature: 2700K
