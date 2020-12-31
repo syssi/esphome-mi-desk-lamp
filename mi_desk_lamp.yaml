@@ -75,3 +75,4 @@ light:
     warm_white: output_warm
     cold_white_color_temperature: 6500K
     warm_white_color_temperature: 2700K
+    gamma_correct: 0
