@@ -1,4 +1,11 @@
 # esphome-mi-desk-lamp
+
+![GitHub actions](https://github.com/syssi/esphome-mi-desk-lamp/actions/workflows/ci.yaml/badge.svg)
+![GitHub stars](https://img.shields.io/github/stars/syssi/esphome-mi-desk-lamp)
+![GitHub forks](https://img.shields.io/github/forks/syssi/esphome-mi-desk-lamp)
+![GitHub watchers](https://img.shields.io/github/watchers/syssi/esphome-mi-desk-lamp)
+[!["Buy Me A Coffee"](https://img.shields.io/badge/buy%20me%20a%20coffee-donate-yellow.svg)](https://www.buymeacoffee.com/syssi)
+
 Esphome custom firmware for the Xiaomi Mi Desk Lamp (MJTD01YL)
 
 Inspiration
