@@ -1,5 +1,5 @@
 substitutions:
-  name: mi_desk_lamp
+  name: mi-desk-lamp
 
 esphome:
   name: ${name}
