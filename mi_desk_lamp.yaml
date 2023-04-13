@@ -1,9 +1,15 @@
 substitutions:
   name: mi-desk-lamp
+  device_description: "Xiaomi Mi Desk Lamp (MJTD01YL)"
 
 esphome:
   name: ${name}
-  platform: ESP8266
+  comment: ${device_description}
+  project:
+    name: "syssi.esphome-mi-desk-lamp"
+    version: 1.0.0
+
+esp8266:
   board: esp8285
 
 wifi:
@@ -11,8 +17,41 @@ wifi:
   password: !secret wifi_password
 
 ota:
-api:
+
 logger:
+
+api:
+
+binary_sensor:
+  - platform: gpio
+    id: button
+    name: "${name} Button"
+    pin:
+      number: GPIO2
+      inverted: true
+    on_click:
+      then:
+        - light.toggle: light1
+
+light:
+  - platform: cwww
+    id: light1
+    default_transition_length: 0s
+    constant_brightness: true
+    name: "${name} Light"
+    cold_white: output_cold
+    warm_white: output_warm
+    cold_white_color_temperature: 6500K
+    warm_white_color_temperature: 2700K
+    gamma_correct: 0
+
+output:
+  - platform: esp8266_pwm
+    pin: GPIO4
+    id: output_cold
+  - platform: esp8266_pwm
+    pin: GPIO5
+    id: output_warm
 
 sensor:
   - platform: rotary_encoder
@@ -46,33 +85,3 @@ sensor:
         - sensor.rotary_encoder.set_value:
             id: rotation
             value: 0
-
-binary_sensor:
-  - platform: gpio
-    id: button
-    pin:
-      number: GPIO2
-      inverted: true
-    on_click:
-      then:
-        - light.toggle: light1
-
-output:
-  - platform: esp8266_pwm
-    pin: GPIO4
-    id: output_cold
-  - platform: esp8266_pwm
-    pin: GPIO5
-    id: output_warm
-
-light:
-  - platform: cwww
-    id: light1
-    default_transition_length: 0s
-    constant_brightness: true
-    name: "${name} Light"
-    cold_white: output_cold
-    warm_white: output_warm
-    cold_white_color_temperature: 6500K
-    warm_white_color_temperature: 2700K
-    gamma_correct: 0
