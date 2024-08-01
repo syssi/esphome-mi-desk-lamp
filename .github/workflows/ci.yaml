@@ -1,5 +1,16 @@
 name: CI
-on: [push]  # yamllint disable-line rule:truthy
+
+on:  # yamllint disable-line rule:truthy
+  push:
+    branches:
+      - main
+  pull_request:
+  schedule:
+    - cron: 0 12 * * *
+
+env:
+  FORCE_COLOR: 1
+
 jobs:
   yamllint:
     runs-on: ubuntu-latest
@@ -10,7 +21,7 @@ jobs:
         with:
           config_file: .yamllint
 
-  build:
+  esphome-compile:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
