@@ -50,4 +50,4 @@ jobs:
       - name: Write secrets.yaml
         shell: bash
         run: 'echo -e "wifi_ssid: ssid\nwifi_password: password" > secrets.yaml'
-      - run: esphome mi_desk_lamp.yaml compile
+      - run: esphome compile mi_desk_lamp.yaml
