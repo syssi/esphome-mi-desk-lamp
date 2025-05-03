@@ -4,50 +4,154 @@ on:  # yamllint disable-line rule:truthy
   push:
     branches:
       - main
+
   pull_request:
   schedule:
     - cron: 0 12 * * *
 
+permissions:
+  contents: read
+
 env:
   FORCE_COLOR: 1
+  DEFAULT_PYTHON: "3.9"
+  PYUPGRADE_TARGET: "--py39-plus"
+
+concurrency:
+  # yamllint disable-line rule:line-length
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 jobs:
   yamllint:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v1
-      - name: yaml-lint
-        uses: ibiqlik/action-yamllint@v3
+      - uses: actions/checkout@v4
+      - name: Run yamllint
+        uses: frenck/action-yamllint@v1
         with:
-          config_file: .yamllint
+          config: .yamllint
+
+  bundle:
+    name: Bundle external component and ESPHome
+    runs-on: ubuntu-24.04
+    outputs:
+      repo-hash: ${{ github.sha }}
+    steps:
+      - name: Check out this project
+        uses: actions/checkout@v4.1.7
+
+      - name: Check out code from ESPHome project
+        uses: actions/checkout@v4.1.7
+        with:
+          repository: esphome/esphome
+          ref: dev
+          path: esphome
+
+      - name: Copy external component into the esphome project
+        run: |
+          cd esphome
+          ln -sf ../venv venv
+
+      - name: Archive prepared repository
+        uses: pyTooling/upload-artifact@v4
+        with:
+          name: bundle
+          path: .
+          include-hidden-files: true
+          retention-days: 1
+
+  common:
+    name: Create common environment
+    runs-on: ubuntu-24.04
+    needs: bundle
+    outputs:
+      cache-key: ${{ steps.cache-key.outputs.key }}
+    steps:
+      - name: Download prepared repository
+        uses: pyTooling/download-artifact@v4
+        with:
+          name: bundle
+          path: .
+      - name: Update index to make "git diff-index" happy
+        run: git update-index -q --really-refresh
+
+      - name: Generate cache-key
+        id: cache-key
+        run: echo key="${{ hashFiles('esphome/requirements.txt', 'esphome/requirements_test.txt') }}" >> $GITHUB_OUTPUT
+      - name: Set up Python ${{ env.DEFAULT_PYTHON }}
+        id: python
+        uses: actions/setup-python@v5.6.0
+        with:
+          python-version: ${{ env.DEFAULT_PYTHON }}
+      - name: Restore Python virtual environment
+        id: cache-venv
+        uses: actions/cache@v4.2.3
+        with:
+          path: venv
+          # yamllint disable-line rule:line-length
+          key: ${{ runner.os }}-${{ steps.python.outputs.python-version }}-venv-${{ steps.cache-key.outputs.key }}
+
+      - name: Create Python virtual environment
+        if: steps.cache-venv.outputs.cache-hit != 'true'
+        run: |
+          python -m venv venv
+          . venv/bin/activate
+          python --version
+          cd esphome
+          pip install -r requirements.txt -r requirements_test.txt
+          pip install -e .
+
+  esphome-config:
+    name: Validate example configurations
+    runs-on: ubuntu-24.04
+    needs:
+      - bundle
+      - common
+    steps:
+      - name: Download prepared repository
+        uses: pyTooling/download-artifact@v4
+        with:
+          name: bundle
+          path: .
+
+      - name: Restore Python
+        uses: ./.github/actions/restore-python
+        with:
+          python-version: ${{ env.DEFAULT_PYTHON }}
+          cache-key: ${{ needs.common.outputs.cache-key }}
+
+      - name: Validate example configurations
+        run: |
+          . venv/bin/activate
+          echo -e "wifi_ssid: ssid\nwifi_password: password" > secrets.yaml
+          for YAML in $(grep -l '^esphome:$' *.yaml); do
+            esphome config $YAML >/dev/null
+          done
 
   esphome-compile:
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
+    name: Build example configurations
+    runs-on: ubuntu-24.04
+    needs:
+      - bundle
+      - common
     steps:
-      - uses: actions/checkout@v2
-      - name: Set up Python
-        uses: actions/setup-python@v2
+      - name: Download prepared repository
+        uses: pyTooling/download-artifact@v4
         with:
-          python-version: '3.12'
-      - name: Cache pip modules
-        uses: actions/cache@v4
+          name: bundle
+          path: .
+
+      - name: Restore Python
+        uses: ./.github/actions/restore-python
         with:
-          path: ~/.cache/pip
-          key: esphome-pip-3.12
-      - name: Cache ~/.platformio
-        uses: actions/cache@v4
-        with:
-          path: ~/.platformio
-          key: test-home-platformio
-      - name: Set up environment
-        run: pip3 install esphome
-      - name: Register problem matchers
+          python-version: ${{ env.DEFAULT_PYTHON }}
+          cache-key: ${{ needs.common.outputs.cache-key }}
+
+      - name: Compile example configurations
         run: |
-          echo "::add-matcher::.github/workflows/matchers/gcc.json"
-          echo "::add-matcher::.github/workflows/matchers/python.json"
-      - name: Write secrets.yaml
-        shell: bash
-        run: 'echo -e "wifi_ssid: ssid\nwifi_password: password" > secrets.yaml'
-      - run: esphome compile mi_desk_lamp.yaml
+          . venv/bin/activate
+          echo -e "wifi_ssid: ssid\nwifi_password: password" > secrets.yaml
+          for YAML in $(grep -l '^esphome:$' *.yaml); do
+            esphome compile $YAML >/dev/null
+          done
