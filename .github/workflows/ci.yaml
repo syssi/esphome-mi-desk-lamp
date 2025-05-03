@@ -51,11 +51,6 @@ jobs:
       - name: Copy external component into the esphome project
         run: |
           cd esphome
-          cp -r ../components/* esphome/components/
-          git config user.name "ci"
-          git config user.email "ci@github.com"
-          git add .
-          git commit -a -m "Add external component"
           ln -sf ../venv venv
 
       - name: Archive prepared repository
