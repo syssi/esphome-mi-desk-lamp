@@ -4,6 +4,7 @@ substitutions:
 
 esphome:
   name: ${name}
+  friendly_name: ${name}
   comment: ${device_description}
   min_version: 2024.6.0
   project:
@@ -28,7 +29,7 @@ api:
 binary_sensor:
   - platform: gpio
     id: button
-    name: "${name} Button"
+    name: "Button"
     pin:
       number: GPIO2
       inverted: true
@@ -41,7 +42,7 @@ light:
     id: light1
     default_transition_length: 0s
     constant_brightness: true
-    name: "${name} Light"
+    name: "Light"
     cold_white: output_cold
     warm_white: output_warm
     cold_white_color_temperature: 6500K
