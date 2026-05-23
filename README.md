@@ -29,13 +29,13 @@ wifi_password: "your-password"
 
 The lamp must be opened to expose the ESP8285 UART pads. Connect the adapter:
 
-| Adapter | Lamp pad |
-|---------|----------|
-| GND     | GND      |
-| 3.3 V   | 3.3 V    |
-| TX      | RX       |
-| RX      | TX       |
-| GND     | GPIO0    |
+| Adapter | Lamp pad | Yeelight LXV1.7 pad |
+|---------|----------|---------------------|
+| GND     | GND      | Pin 3 (Left side)   |
+| 3.3 V   | 3.3 V    | Pin 8 (Bottom)      |
+| TX      | RX       | Pin 17 (Right side) |
+| RX      | TX       | Pin 18 (Right side) |
+| GND     | GPIO0    | Pin 4 (Left side)   |
 
 GPIO0 is not exposed as a button — solder a wire to the GPIO0 pad and pull it to GND while powering on to enter flash mode. Once flashing starts, the wire can be removed.
 
