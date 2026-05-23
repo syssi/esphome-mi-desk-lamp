@@ -31,7 +31,7 @@ The lamp must be opened to expose the ESP8285 UART pads. Connect the adapter:
 
 | Adapter | Lamp pad | Yeelight LXV1.7 pad |
 |---------|----------|---------------------|
-| GND     | GND      | Pin 3 (Left side)   |
+| GND     | GND      | Pin 7 (Bottom)      |
 | 3.3 V   | 3.3 V    | Pin 8 (Bottom)      |
 | TX      | RX       | Pin 17 (Right side) |
 | RX      | TX       | Pin 18 (Right side) |
