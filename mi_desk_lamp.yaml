@@ -26,6 +26,9 @@ logger:
   level: DEBUG
 
 api:
+  # Uncomment if the device won't be permanently connected to Home Assistant,
+  # otherwise it reboots periodically when no API connection is established.
+  # reboot_timeout: 0s
 
 binary_sensor:
   - platform: gpio
