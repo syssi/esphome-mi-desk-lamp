@@ -8,6 +8,50 @@
 
 ESPHome custom firmware for the Xiaomi Mi Desk Lamp (MJTD01YL)
 
+## Getting Started
+
+### Prerequisites
+
+- [ESPHome](https://esphome.io/guides/installing_esphome) installed
+- USB-to-serial adapter (3.3 V logic level, e.g. CP2102 or CH340)
+- Soldering iron to access the UART pads inside the lamp
+
+### Configuration
+
+Copy `secrets.yaml` and fill in your Wi-Fi credentials:
+
+```yaml
+wifi_ssid: "your-ssid"
+wifi_password: "your-password"
+```
+
+### First flash (serial)
+
+The lamp must be opened to expose the ESP8285 UART pads. Connect the adapter:
+
+| Adapter | Lamp pad |
+|---------|----------|
+| GND     | GND      |
+| 3.3 V   | 3.3 V    |
+| TX      | RX       |
+| RX      | TX       |
+
+Hold the lamp's button while powering it on to enter flash mode, then run:
+
+```bash
+esphome run mi_desk_lamp.yaml
+```
+
+### OTA updates
+
+Once the firmware is running, all subsequent updates can be flashed wirelessly:
+
+```bash
+esphome run mi_desk_lamp.yaml
+```
+
+ESPHome will detect the device on the network and flash over-the-air automatically.
+
 ## Inspiration
 
 * https://github.com/fvollmer/open-desk-lamp-firmware
