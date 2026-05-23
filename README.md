@@ -39,6 +39,8 @@ The lamp must be opened to expose the ESP8285 UART pads. Connect the adapter:
 
 GPIO0 is not exposed as a button — solder a wire to the GPIO0 pad and pull it to GND while powering on to enter flash mode. Once flashing starts, the wire can be removed.
 
+For a detailed walkthrough with photos of the disassembly and wiring, refer to the [Tasmota device page for the Xiaomi Mi Desk Lamp](https://tasmota.github.io/docs/devices/Xiaomi-Mi-Desk-Lamp/).
+
 Then run:
 
 ```bash
