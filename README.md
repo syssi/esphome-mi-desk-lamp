@@ -35,8 +35,11 @@ The lamp must be opened to expose the ESP8285 UART pads. Connect the adapter:
 | 3.3 V   | 3.3 V    |
 | TX      | RX       |
 | RX      | TX       |
+| GND     | GPIO0    |
 
-Hold the lamp's button while powering it on to enter flash mode, then run:
+GPIO0 is not exposed as a button — solder a wire to the GPIO0 pad and pull it to GND while powering on to enter flash mode. Once flashing starts, the wire can be removed.
+
+Then run:
 
 ```bash
 esphome run mi_desk_lamp.yaml
